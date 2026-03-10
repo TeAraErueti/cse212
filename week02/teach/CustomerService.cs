@@ -11,24 +11,69 @@ public class CustomerService {
         // Test Cases
 
         // Test 1
-        // Scenario: 
-        // Expected Result: 
-        Console.WriteLine("Test 1");
-
-        // Defect(s) Found: 
+        // Scenario: Create a queue using an invalid maximum size (0).
+        // Expected Result: The queue size should default to 10.
+        // Defects Found: None. The constructor correctly defaults the size to 10.
+        Console.WriteLine("Test 1 - Invalid Queue Size");
+        var cs1 = new CustomerService(0);
+        Console.WriteLine(cs1);
+        Console.WriteLine("Expected: max_size should default to 10");
 
         Console.WriteLine("=================");
 
         // Test 2
-        // Scenario: 
-        // Expected Result: 
-        Console.WriteLine("Test 2");
+        // Scenario: Attempt to add more customers than the maximum queue size allows.
+        // Expected Result: An error message should display when trying to add a customer
+        // once the queue has reached its maximum capacity.
+        // Defects Found: The original code used > instead of >= which allowed one extra
+        // customer to be added beyond the maximum size.
+        Console.WriteLine("Test 2 - Queue Full");
+        var cs2 = new CustomerService(1);
+        Console.WriteLine("Add one customer");
+        cs2.AddNewCustomer();
 
-        // Defect(s) Found: 
+        Console.WriteLine("Add second customer (should show error)");
+        cs2.AddNewCustomer();
 
         Console.WriteLine("=================");
 
-        // Add more Test Cases As Needed Below
+        // Test 3
+        // Scenario: Attempt to serve a customer when the queue is empty.
+        // Expected Result: An error message should display indicating that there
+        // are no customers in the queue.
+        // Defects Found: The original code did not check if the queue was empty
+        // before trying to remove a customer which caused an index error.
+        Console.WriteLine("Test 3 - Serve Customer from Empty Queue");
+        var cs3 = new CustomerService(3);
+        cs3.ServeCustomer();
+        Console.WriteLine("Expected: Error message for empty queue");
+
+        Console.WriteLine("=================");
+
+        // Test 4
+        // Scenario: Add multiple customers and then serve them.
+        // Expected Result: Customers should be served in the same order they were added
+        // (First In, First Out).
+        // Defects Found: The original code removed the first customer before reading it,
+        // which caused the second customer to be displayed instead.
+        Console.WriteLine("Test 4 - FIFO Order");
+        var cs4 = new CustomerService(5);
+        cs4.AddNewCustomer();
+        cs4.AddNewCustomer();
+        cs4.ServeCustomer();
+        Console.WriteLine("Expected: First customer entered should be served first");
+    
+        Console.WriteLine("=================");
+
+        // Test 5
+        // Scenario: Create a queue with an invalid size again to confirm
+        // the default size behavior.
+        // Expected Result: The queue should display a max size of 10.
+        // Defects Found: None. The constructor correctly handles invalid input.
+        Console.WriteLine("Test 5 - Default Queue Size");
+        var cs5 = new CustomerService(0);
+        Console.WriteLine(cs5);
+        Console.WriteLine("Expected: max_size should default to 10");      
     }
 
     private readonly List<Customer> _queue = new();
@@ -66,8 +111,9 @@ public class CustomerService {
     /// new record into the queue.
     /// </summary>
     private void AddNewCustomer() {
-        // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        // Verify there is room in the service queue.
+        //Corrected queue check as previous code allowed one extra customer.
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +134,15 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
-        _queue.RemoveAt(0);
+        //Add check to see if queue is empty before serving. 
+        if (_queue.Count == 0) {
+        Console.WriteLine("No customers in queue.");
+        return;
+        }
+
+        //correct code as last code was removing first customer and printing second customer which violated the FIFO rules.
         var customer = _queue[0];
+        _queue.RemoveAt(0);
         Console.WriteLine(customer);
     }
 
